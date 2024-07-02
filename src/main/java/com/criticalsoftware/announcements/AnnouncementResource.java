@@ -276,4 +276,10 @@ public class AnnouncementResource {
         }
         return Response.ok(announcementResponses).build();
     }
+
+    @PUT
+    @Path("/{id}/undo-claim")
+    public Response undoClaim(@PathParam("id") String id) {
+        return announcementRepository.undoClaim(id);
+    }
 }
