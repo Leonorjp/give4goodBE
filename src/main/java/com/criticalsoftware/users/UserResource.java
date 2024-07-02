@@ -1,5 +1,6 @@
-package com.criticalsoftware;
+package com.criticalsoftware.users;
 
+import com.criticalsoftware.Contact;
 import org.bson.types.ObjectId;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.DELETE;

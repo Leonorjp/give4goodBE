@@ -1,5 +1,6 @@
-package com.criticalsoftware;
+package com.criticalsoftware.users;
 import java.util.List;
+
 import io.quarkus.mongodb.panache.PanacheMongoRepository;
 import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;

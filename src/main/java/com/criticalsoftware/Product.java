@@ -1,31 +1,33 @@
 package com.criticalsoftware;
 
+import com.criticalsoftware.users.User;
+import org.bson.types.ObjectId;
+
 public class Product {
 
-    private String id;
-    private String description;
-    private String photoUrl;
-    private String category;
+    private ObjectId id;
     private String name;
+    private String description;
+    private String photo;
+    private String category;
 
     public Product() {
     }
 
-    public Product(String id, String description, String photoUrl, String category, String name) {
-        this.id = id;
-        this.description = description;
-        this.photoUrl = photoUrl;
-        this.category = category;
+    public Product(String name,String description, String photo, String category, User userDonnor) {
         this.name = name;
+        this.description = description;
+        this.photo = photo;
+        this.category = category;
     }
 
-    //description
-    public String getId(){
-        return this.id;
+    //Name
+    public String getName(){
+        return this.name;
     }
 
-    public void setId (String id) {
-        this.id = id;
+    public void setName(String name) {
+        this.name = name;
     }
 
     //description
@@ -39,11 +41,11 @@ public class Product {
 
     //photo
     public String getPhotoUrl(){
-        return this.photoUrl;
+        return this.photo;
     }
 
-    public void setPhotoUrl(String photoUrl) {
-        this.photoUrl = photoUrl;
+    public void setPhotoUrl(String photo) {
+        this.photo = photo;
     }
 
     //category
@@ -55,12 +57,12 @@ public class Product {
         this.category = category;
     }
 
-    //name
-    public String getName(){
-        return this.name;
+    //Id
+    public ObjectId getId(){
+        return this.id;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setId(ObjectId id) {
+        this.id = id;
     }
 }

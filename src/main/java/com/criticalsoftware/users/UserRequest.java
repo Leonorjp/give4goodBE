@@ -1,21 +1,28 @@
-package com.criticalsoftware;
-import io.quarkus.mongodb.panache.PanacheMongoEntity;
-import io.quarkus.mongodb.panache.common.MongoEntity;
-import org.bson.types.ObjectId;
+package com.criticalsoftware.users;
+
+import com.criticalsoftware.Contact;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
-@MongoEntity(collection = "users")
-public class User extends PanacheMongoEntity {
-
-    private ObjectId id;
+//User Data Request
+public class UserRequest {
+    @NotBlank(message = "Name may not be blank")
     private String name;
+
+    @NotNull(message ="Date Birth is mandatory")
     private LocalDate dateBirth;
+
+    @Valid
+    @NotNull(message = "Contact is mandatory" )
     private Contact contact;
 
-    public User() {
+    public UserRequest() {
+        // It doesn't necessarily need implementation here
     }
 
-    public User(String name, LocalDate dateBirth, Contact contact) {
+    public UserRequest(String name, LocalDate dateBirth, Contact contact) {
         this.name = name;
         this.dateBirth = dateBirth;
         this.contact = contact;
@@ -44,14 +51,5 @@ public class User extends PanacheMongoEntity {
 
     public void setContact(Contact contact) {
         this.contact = contact;
-    }
-
-    //Id
-    public ObjectId getId(){
-        return this.id;
-    }
-
-    public void setId(ObjectId id) {
-        this.id = id;
     }
 }

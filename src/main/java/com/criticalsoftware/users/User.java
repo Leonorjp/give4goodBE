@@ -1,36 +1,28 @@
-package com.criticalsoftware;
+package com.criticalsoftware.users;
+import com.criticalsoftware.Contact;
+import io.quarkus.mongodb.panache.PanacheMongoEntity;
+import io.quarkus.mongodb.panache.common.MongoEntity;
 import org.bson.types.ObjectId;
-
 import java.time.LocalDate;
 
-//User Data Response
-public class UserResponse {
+@MongoEntity(collection = "users")
+public class User extends PanacheMongoEntity {
 
     private ObjectId id;
     private String name;
     private LocalDate dateBirth;
     private Contact contact;
 
-    public UserResponse() {
-
+    public User() {
     }
 
-    public UserResponse(ObjectId id, String name, LocalDate dateBirth, Contact contact) {
-        this.id = id;
+    public User(String name, LocalDate dateBirth, Contact contact) {
         this.name = name;
         this.dateBirth = dateBirth;
         this.contact = contact;
     }
 
     // Getters and Setters
-    public ObjectId getId() {
-        return id;
-    }
-
-    public void setId(ObjectId id) {
-        this.id = id;
-    }
-
     public String getName() {
         return name;
     }
@@ -53,5 +45,14 @@ public class UserResponse {
 
     public void setContact(Contact contact) {
         this.contact = contact;
+    }
+
+    //Id
+    public ObjectId getId(){
+        return this.id;
+    }
+
+    public void setId(ObjectId id) {
+        this.id = id;
     }
 }
