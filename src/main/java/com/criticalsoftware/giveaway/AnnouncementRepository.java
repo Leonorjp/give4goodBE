@@ -2,6 +2,7 @@ package com.criticalsoftware.giveaway;
 
 import java.util.List;
 
+import com.criticalsoftware.Announcement;
 import io.quarkus.mongodb.panache.PanacheMongoRepository;
 import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;

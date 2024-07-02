@@ -1,5 +1,6 @@
 package com.criticalsoftware.giveaway;
 
+import com.criticalsoftware.Announcement;
 import jakarta.ws.rs.core.Response;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
