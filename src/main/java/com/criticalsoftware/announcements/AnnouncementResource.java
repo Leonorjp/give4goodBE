@@ -1,5 +1,7 @@
-package com.criticalsoftware;
+package com.criticalsoftware.announcements;
 
+import com.criticalsoftware.users.User;
+import com.criticalsoftware.users.UserRepository;
 import jakarta.inject.Inject;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
@@ -8,6 +10,7 @@ import jakarta.ws.rs.core.Response;
 import org.bson.types.ObjectId;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,22 +19,28 @@ import java.util.stream.Collectors;
 @Path("/announcements")
 public class AnnouncementResource {
 
-    @Inject
-    private AnnouncementRepository announcementRepository;
+    public static final String ID_REGEX = "[a-fA-F0-9]{24}";
+
+    public static final String INVALID_ID_FORMAT = "Invalid ID format";
+
+    public static final String REQUEST_ERROR = "Error in processing the request: ";
 
     @Inject
-    private AnnouncementService announcementService;
+    AnnouncementRepository announcementRepository;
 
     @Inject
-    private UserRepository userRepository;
+    AnnouncementService announcementService;
+
+    @Inject
+    UserRepository userRepository;
 
     @DELETE
     @Path("/{id}")
     public Response delete(@PathParam("id") String id) {
 
         // Check if the provided ID is valid
-        if (!id.matches("[a-fA-F0-9]{24}")) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid ID format").build();
+        if (!id.matches(ID_REGEX)) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(INVALID_ID_FORMAT).build();
         }
         // Find the announcement by ID
         Announcement announcement = announcementRepository.findById(id);
@@ -55,8 +64,8 @@ public class AnnouncementResource {
     public Response update(@PathParam("id") String id, AnnouncementRequest announcementRequest) {
         try {
             Announcement announcement = announcementRepository.findById(id);
-            if (!id.matches("[a-fA-F0-9]{24}")) {
-                return Response.status(Response.Status.BAD_REQUEST).entity("Invalid ID format").build();
+            if (!id.matches(ID_REGEX)) {
+                return Response.status(Response.Status.BAD_REQUEST).entity(INVALID_ID_FORMAT).build();
             }
 
             if (announcement == null) {
@@ -120,8 +129,8 @@ public class AnnouncementResource {
             responseMap.put("announcement", new AnnouncementResponse(
                     announcement.id.toString(),
                     announcement.getProduct(),
-                    announcement.getUserDonor().getId(),
-                    announcement.getUserDonee().getId(),
+                    announcement.getUserDonor().id,
+                    announcement.getUserDonee().id,
                     announcement.getDate()
             ));
 
@@ -137,7 +146,7 @@ public class AnnouncementResource {
                     .build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error in processing the request: " + e.getMessage())
+                    .entity(REQUEST_ERROR + e.getMessage())
                     .build();
         }
     }
@@ -161,7 +170,7 @@ public class AnnouncementResource {
             return Response.ok(announcements).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error in processing the request: " + e.getMessage())
+                    .entity(REQUEST_ERROR + e.getMessage())
                     .build();
         }
     }
@@ -180,7 +189,7 @@ public class AnnouncementResource {
             return Response.ok(announcements).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error in processing the request: " + e.getMessage())
+                    .entity(REQUEST_ERROR + e.getMessage())
                     .build();
         }
     }
@@ -194,7 +203,7 @@ public class AnnouncementResource {
             return Response.ok(announcements).build();
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity("Error in processing the request: " + e.getMessage())
+                    .entity(REQUEST_ERROR + e.getMessage())
                     .build();
         }
     }
@@ -206,8 +215,8 @@ public class AnnouncementResource {
 
             // Check if the announcementId is valid
             Announcement announcement = announcementRepository.findById(announcementId);
-            if (!announcementId.matches("[a-fA-F0-9]{24}")) {
-                return Response.status(Response.Status.BAD_REQUEST).entity("Invalid ID format").build();
+            if (!announcementId.matches(ID_REGEX)) {
+                return Response.status(Response.Status.BAD_REQUEST).entity(INVALID_ID_FORMAT).build();
             }
 
             // Find the announcement by ID
@@ -217,8 +226,8 @@ public class AnnouncementResource {
 
             // Check if the userDoneeId is valid
             User userDonee = userRepository.findById(userId);
-            if (!userId.matches("[a-fA-F0-9]{24}")) {
-                return Response.status(Response.Status.BAD_REQUEST).entity("Invalid ID format").build();
+            if (!userId.matches(ID_REGEX)) {
+                return Response.status(Response.Status.BAD_REQUEST).entity(INVALID_ID_FORMAT).build();
             }
 
             // Find the user by ID
@@ -227,7 +236,7 @@ public class AnnouncementResource {
             }
 
             // Check if userDonorId and userDoneeId are not the same
-            if (announcement.getUserDonor().getId().equals(new ObjectId(userId))) {
+            if (announcement.getUserDonor().id.equals(new ObjectId(userId))) {
                 return Response.status(Response.Status.BAD_REQUEST).entity("The doner Id and donee Id cannot be the same!").build();
             }
 
@@ -241,5 +250,30 @@ public class AnnouncementResource {
         } catch (Exception e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error occurred while updating the userDonee").build();
         }
+    }
+
+    //Get by id
+    @GET
+    @Path("/{id}")
+    public Response getById(@PathParam("id") String id) {
+        Announcement announcement = announcementRepository.findById(id);
+        if (announcement == null) {
+            return Response.status(Response.Status.NOT_FOUND).entity("Announcement not found.").build();
+        }
+        AnnouncementResponse announcementResponse = new AnnouncementResponse(announcement.id.toString(), announcement.getProduct(), announcement.getUserDonor().id, announcement.getUserDonee().id, announcement.getDate());
+        return Response.ok(announcementResponse).build();
+    }
+
+    //Get ALL
+    @GET
+    public Response getAll() {
+        List<Announcement> announcements = announcementRepository.listAll();
+
+        List<AnnouncementResponse> announcementResponses = new ArrayList<>();
+        for (Announcement announcement : announcements) {
+            AnnouncementResponse announcementResponse = new AnnouncementResponse(announcement.id.toString(), announcement.getProduct(), announcement.getUserDonor().id, announcement.getUserDonee().id, announcement.getDate());
+            announcementResponses.add(announcementResponse);
+        }
+        return Response.ok(announcementResponses).build();
     }
 }

@@ -1,35 +1,31 @@
-package com.criticalsoftware;
+package com.criticalsoftware.users;
 
-import org.bson.types.ObjectId;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.DELETE;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.GET;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+import org.bson.types.ObjectId;
+
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import jakarta.ws.rs.core.Response.Status;
-import java.net.URI;
 
 @Path("/users")
 public class UserResource {
 
     @Inject
-    private UserRepository repository;
+    UserRepository repository;
 
     @POST
-    public Response create(@Valid UserRequest userRequest)  {
+    public Response create(@Valid UserRequest userRequest) {
         try {
             User user = new User(userRequest.getName(), userRequest.getDateBirth(), userRequest.getContact());
             repository.persist(user);
-            return Response.created(new URI("/users/" + user.getId()))
-                    .entity("User created successfully with ID: " + user.getId())
+            return Response.created(new URI("/users/" + user.id))
+                    .entity("User created successfully with ID: " + user.id)
                     .build();
         } catch (ConstraintViolationException e) {
             String errorMessages = e.getConstraintViolations().stream().map(violation -> violation.getPropertyPath() + ": " + violation.getMessage()).collect(Collectors.joining(", "));
@@ -47,7 +43,7 @@ public class UserResource {
         if (user == null) {
             return Response.status(Response.Status.NOT_FOUND).entity("User not found.").build();
         }
-        UserResponse userResponse = new UserResponse(user.getId(), user.getName(), user.getDateBirth(), user.getContact());
+        UserResponse userResponse = new UserResponse(user.id, user.getName(), user.getDateBirth(), user.getContact());
         return Response.ok(userResponse).build();
     }
 
@@ -57,7 +53,7 @@ public class UserResource {
 
         List<UserResponse> userResponses = new ArrayList<>();
         for (User user : users) {
-            UserResponse userResponse = new UserResponse(user.getId(), user.getName(), user.getDateBirth(), user.getContact());
+            UserResponse userResponse = new UserResponse(user.id, user.getName(), user.getDateBirth(), user.getContact());
             userResponses.add(userResponse);
         }
         return Response.ok(userResponses).build();

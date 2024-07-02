@@ -1,11 +1,10 @@
-package com.criticalsoftware;
+package com.criticalsoftware.announcements;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.bson.types.ObjectId;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class AnnouncementService {
@@ -19,7 +18,7 @@ public class AnnouncementService {
         ObjectId donorObjectId = new ObjectId(donorId);
         return announcementRepository.findByDonorId(donorObjectId).stream()
                 .map(this::mapToResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     // Retrieves announcements by donee ID
@@ -27,7 +26,7 @@ public class AnnouncementService {
         ObjectId doneeObjectId = new ObjectId(doneeId);
         return announcementRepository.findByDoneeId(doneeObjectId).stream()
                 .map(this::mapToResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     // Retrieves announcements by donor and donee ID
@@ -36,7 +35,7 @@ public class AnnouncementService {
         ObjectId doneeObjectId = new ObjectId(doneeId);
         return announcementRepository.findByDonorAndDoneeId(donorObjectId, doneeObjectId).stream()
                 .map(this::mapToResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     // Maps an Announcement entity to an AnnouncementResponse
@@ -44,8 +43,8 @@ public class AnnouncementService {
         return new AnnouncementResponse(
                 announcement.id.toString(),
                 announcement.getProduct(),
-                announcement.getUserDonor().getId(),
-                announcement.getUserDonee().getId(),
+                announcement.getUserDonor().id,
+                announcement.getUserDonee().id,
                 announcement.getDate()
         );
     }

@@ -1,5 +1,6 @@
-package com.criticalsoftware;
+package com.criticalsoftware.announcements;
 
+import com.criticalsoftware.users.User;
 import io.quarkus.mongodb.panache.PanacheMongoEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

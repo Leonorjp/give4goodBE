@@ -1,4 +1,4 @@
-package com.criticalsoftware;
+package com.criticalsoftware.announcements;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

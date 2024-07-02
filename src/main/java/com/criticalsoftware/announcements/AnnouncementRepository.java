@@ -1,9 +1,9 @@
-package com.criticalsoftware;
+package com.criticalsoftware.announcements;
 
 import io.quarkus.mongodb.panache.PanacheMongoRepository;
-import io.quarkus.panache.common.Sort;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.bson.types.ObjectId;
+
 import java.util.List;
 
 // Repository for the Announcement entity
@@ -13,16 +13,6 @@ public class AnnouncementRepository implements PanacheMongoRepository<Announceme
     // Find an announcement by ID
     public Announcement findById(String id) {
         return find("_id", id).firstResult();
-    }
-
-    // List all announcements sorted by creation date (descending)
-    public List<Announcement> listAllSortedByDate() {
-        return listAll(Sort.by("date").descending());
-    }
-
-    // Find announcements by product description
-    public List<Announcement> findByProductDescription(String description) {
-        return list("product.description", description);
     }
 
     // Find announcements by donor ID

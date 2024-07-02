@@ -1,4 +1,4 @@
-package com.criticalsoftware;
+package com.criticalsoftware.announcements;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
