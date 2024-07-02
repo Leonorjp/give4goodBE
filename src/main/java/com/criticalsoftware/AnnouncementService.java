@@ -42,10 +42,10 @@ public class AnnouncementService {
     // Maps an Announcement entity to an AnnouncementResponse
     private AnnouncementResponse mapToResponse(Announcement announcement) {
         return new AnnouncementResponse(
-                announcement.getId(),
+                announcement.id.toString(),
                 announcement.getProduct(),
-                announcement.getUserDonorId(),
-                announcement.getUserDoneeId(),
+                announcement.getUserDonor().getId(),
+                announcement.getUserDonee().getId(),
                 announcement.getDate()
         );
     }

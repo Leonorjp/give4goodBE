@@ -1,66 +1,28 @@
 package com.criticalsoftware;
 
+import io.quarkus.mongodb.panache.PanacheMongoEntity;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.bson.types.ObjectId;
+
 import java.time.LocalDateTime;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
-public class Announcement {
-    private String id;
+public class Announcement extends PanacheMongoEntity {
+
     private Product product;
-    private ObjectId userDonorId;
-    private ObjectId userDoneeId;
     private LocalDateTime date;
+    private User userDonor;
+    private User userDonee;
+    private boolean isClaimed;
 
-    public Announcement() {
-    }
-
-    public Announcement(Product product, ObjectId userDonorId) {
+    public Announcement(Product product, User userDonor) {
         this.product = product;
-        this.userDonorId = userDonorId;
         this.date = LocalDateTime.now();
-    }
-
-    // Getters and Setters
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public Product getProduct() {
-        return product;
-    }
-
-    public void setProduct(Product product) {
-        this.product = product;
-    }
-
-    public ObjectId getUserDonorId() {
-        return userDonorId;
-    }
-
-    public void setUserDonorId(ObjectId userDonorId) {
-        this.userDonorId = userDonorId;
-    }
-
-    public LocalDateTime getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDateTime date) {
-        this.date = date;
-    }
-
-    public ObjectId getUserDoneeId() {
-        return userDoneeId;
-    }
-
-    public void setUserDoneeId(ObjectId userDoneeId) {
-        this.userDoneeId = userDoneeId;
+        this.userDonor = userDonor;
     }
 }

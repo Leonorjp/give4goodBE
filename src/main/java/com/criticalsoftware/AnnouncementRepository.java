@@ -39,4 +39,14 @@ public class AnnouncementRepository implements PanacheMongoRepository<Announceme
     public List<Announcement> findByDonorAndDoneeId(ObjectId donorId, ObjectId doneeId) {
         return list("userDonorId = ?1 and userDoneeId = ?2", donorId, doneeId);
     }
+
+    // Delete an announcement by ID
+    public void deleteById(String id) {
+        try {
+            // Delete the announcement from the collection using the ID
+            delete("_id", id);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid ID format", e);
+        }
+    }
 }

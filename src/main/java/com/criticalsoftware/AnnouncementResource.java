@@ -1,20 +1,17 @@
 package com.criticalsoftware;
 
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
+import org.bson.types.ObjectId;
+
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.bson.types.ObjectId;
 
 @Path("/announcements")
 public class AnnouncementResource {
@@ -28,19 +25,77 @@ public class AnnouncementResource {
     @Inject
     private UserRepository userRepository;
 
+    @DELETE
+    @Path("/{id}")
+    public Response delete(@PathParam("id") String id) {
+
+        // Check if the provided ID is valid
+        if (!id.matches("[a-fA-F0-9]{24}")) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid ID format").build();
+        }
+        // Find the announcement by ID
+        Announcement announcement = announcementRepository.findById(id);
+        if (announcement == null) {
+            return Response.status(Response.Status.NOT_FOUND).entity("Announcement not found.").build();
+        }
+
+        // Use the repository method to delete by ID
+        announcementRepository.deleteById(id);
+
+        // Check if the announcement still exists
+        announcement = announcementRepository.findById(id);
+        if (announcement != null) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error occurred while deleting the announcement").build();
+        }
+        return Response.noContent().build();
+    }
+
+    @PUT
+    @Path("/{id}")
+    public Response update(@PathParam("id") String id, AnnouncementRequest announcementRequest) {
+        try {
+            Announcement announcement = announcementRepository.findById(id);
+            if (!id.matches("[a-fA-F0-9]{24}")) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("Invalid ID format").build();
+            }
+
+            if (announcement == null) {
+                return Response.status(Response.Status.NOT_FOUND).entity("Announcement not found").build();
+            }
+
+            // Check if the product details are present and not just spaces in the request
+            if (announcementRequest.getProductName() == null || announcementRequest.getProductName().trim().isEmpty() ||
+                    announcementRequest.getProductDescription() == null || announcementRequest.getProductDescription().trim().isEmpty() ||
+                    announcementRequest.getProductPhotoUrl() == null || announcementRequest.getProductPhotoUrl().trim().isEmpty() ||
+                    announcementRequest.getProductCategory() == null || announcementRequest.getProductCategory().trim().isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("Product details are missing or empty").build();
+            }
+
+            Product newProduct = new Product(announcementRequest.getProductName(), announcementRequest.getProductDescription(), announcementRequest.getProductPhotoUrl(), announcementRequest.getProductCategory());
+            announcement.setProduct(newProduct);
+
+            // Update the announcement in the repository
+            announcementRepository.persistOrUpdate(announcement);
+
+            return Response.ok(announcement).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error occurred while updating the announcement").build();
+        }
+    }
+
     // Create an announcement
     @POST
     public Response create(@Valid AnnouncementRequest request) {
         try {
             User userDonor = userRepository.findById(new ObjectId(request.getUserDonorId()));
             if (userDonor == null) {
-                return Response.status(Status.BAD_REQUEST)
+                return Response.status(Response.Status.BAD_REQUEST)
                         .entity("User donor ID does not exist.")
                         .build();
             }
 
             if (isProductFieldsEmpty(request)) {
-                return Response.status(Status.BAD_REQUEST)
+                return Response.status(Response.Status.BAD_REQUEST)
                         .entity("All product fields must be filled.")
                         .build();
             }
@@ -54,36 +109,34 @@ public class AnnouncementResource {
 
             Announcement announcement = new Announcement(
                     product,
-                    userDonor.getId()
+                    userDonor
 
             );
-
-            announcement.setId(new ObjectId().toString());
 
             announcementRepository.persist(announcement);
 
             Map<String, Object> responseMap = new HashMap<>();
-            responseMap.put("message", "Announcement created successfully with ID: " + announcement.getId());
+            responseMap.put("message", "Announcement created successfully with ID: " + announcement.id);
             responseMap.put("announcement", new AnnouncementResponse(
-                    announcement.getId(),
+                    announcement.id.toString(),
                     announcement.getProduct(),
-                    announcement.getUserDonorId(),
-                    announcement.getUserDoneeId(),
+                    announcement.getUserDonor().getId(),
+                    announcement.getUserDonee().getId(),
                     announcement.getDate()
             ));
 
-            return Response.created(new URI("/announcements/" + announcement.getId()))
+            return Response.created(new URI("/announcements/" + announcement.id))
                     .entity(responseMap)
                     .build();
         } catch (ConstraintViolationException e) {
             String errorMessages = e.getConstraintViolations().stream()
                     .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
                     .collect(Collectors.joining(", "));
-            return Response.status(Status.BAD_REQUEST)
+            return Response.status(Response.Status.BAD_REQUEST)
                     .entity("Validation error: " + errorMessages)
                     .build();
         } catch (Exception e) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR)
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("Error in processing the request: " + e.getMessage())
                     .build();
         }
@@ -101,13 +154,13 @@ public class AnnouncementResource {
         try {
             List<AnnouncementResponse> announcements = announcementService.getAnnouncementsByDonorId(donorId);
             if (announcements == null || announcements.isEmpty()) {
-                return Response.status(Status.NOT_FOUND)
+                return Response.status(Response.Status.NOT_FOUND)
                         .entity("No announcements found for the given donor ID.")
                         .build();
             }
             return Response.ok(announcements).build();
         } catch (Exception e) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR)
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("Error in processing the request: " + e.getMessage())
                     .build();
         }
@@ -120,13 +173,13 @@ public class AnnouncementResource {
         try {
             List<AnnouncementResponse> announcements = announcementService.getAnnouncementsByDoneeId(doneeId);
             if (announcements == null || announcements.isEmpty()) {
-                return Response.status(Status.NOT_FOUND)
+                return Response.status(Response.Status.NOT_FOUND)
                         .entity("No announcements found for the given donee ID.")
                         .build();
             }
             return Response.ok(announcements).build();
         } catch (Exception e) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR)
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("Error in processing the request: " + e.getMessage())
                     .build();
         }
@@ -140,9 +193,53 @@ public class AnnouncementResource {
             List<AnnouncementResponse> announcements = announcementService.getAnnouncementsByDonorAndDoneeId(donorId, doneeId);
             return Response.ok(announcements).build();
         } catch (Exception e) {
-            return Response.status(Status.INTERNAL_SERVER_ERROR)
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity("Error in processing the request: " + e.getMessage())
                     .build();
+        }
+    }
+
+    @PUT
+    @Path("/{announcementId}/userDonee/{userId}")
+    public Response updateUserDonee(@PathParam("announcementId") String announcementId, @PathParam("userId") String userId) {
+        try {
+
+            // Check if the announcementId is valid
+            Announcement announcement = announcementRepository.findById(announcementId);
+            if (!announcementId.matches("[a-fA-F0-9]{24}")) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("Invalid ID format").build();
+            }
+
+            // Find the announcement by ID
+            if (announcement == null) {
+                return Response.status(Response.Status.NOT_FOUND).entity("Announcement not found").build();
+            }
+
+            // Check if the userDoneeId is valid
+            User userDonee = userRepository.findById(userId);
+            if (!userId.matches("[a-fA-F0-9]{24}")) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("Invalid ID format").build();
+            }
+
+            // Find the user by ID
+            if (userDonee == null) {
+                return Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
+            }
+
+            // Check if userDonorId and userDoneeId are not the same
+            if (announcement.getUserDonor().getId().equals(new ObjectId(userId))) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("The doner Id and donee Id cannot be the same!").build();
+            }
+
+            // Set the userDoneeId field of the announcement
+            announcement.setUserDonee(userDonee);
+
+            // Update the announcement in the repository
+            announcementRepository.persistOrUpdate(announcement);
+
+            return Response.ok(announcement).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error occurred while updating the userDonee").build();
         }
     }
 }
