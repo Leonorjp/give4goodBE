@@ -43,8 +43,8 @@ public class AnnouncementService {
         return new AnnouncementResponse(
                 announcement.getId(),
                 announcement.getProduct(),
-                announcement.getUserDonorId(),
-                announcement.getUserDoneeId(),
+                announcement.getUserDonor().getId(),
+                announcement.getUserDonee().getId(),
                 announcement.getDate()
         );
     }

@@ -1,20 +1,21 @@
 package com.criticalsoftware;
 
-import jakarta.ws.rs.Path;
+import jakarta.inject.Inject;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
-import jakarta.inject.Inject;
-import jakarta.validation.Valid;
-import jakarta.validation.ConstraintViolationException;
+import org.bson.types.ObjectId;
+
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.bson.types.ObjectId;
 
 @Path("/announcements")
 public class AnnouncementResource {
@@ -53,7 +54,7 @@ public class AnnouncementResource {
 
             Announcement announcement = new Announcement(
                     product,
-                    userDonor.getId()
+                    userDonor
 
             );
 
@@ -66,8 +67,8 @@ public class AnnouncementResource {
             responseMap.put("announcement", new AnnouncementResponse(
                     announcement.getId(),
                     announcement.getProduct(),
-                    announcement.getUserDonorId(),
-                    announcement.getUserDoneeId(),
+                    announcement.getUserDonor().getId(),
+                    announcement.getUserDonee().getId(),
                     announcement.getDate()
             ));
 
