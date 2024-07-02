@@ -2,6 +2,8 @@ package com.criticalsoftware.announcements;
 
 import io.quarkus.mongodb.panache.PanacheMongoRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.core.Response;
 import org.bson.types.ObjectId;
 
 import java.util.List;
@@ -38,5 +40,19 @@ public class AnnouncementRepository implements PanacheMongoRepository<Announceme
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid ID format", e);
         }
+    }
+
+    @Transactional
+    public Response undoClaim(String id) {
+        Announcement announcement = findById(id);
+        if (announcement == null) {
+            return Response.status(Response.Status.NOT_FOUND).entity("Announcement not found.").build();
+        }
+        if (announcement.getUserDonee().id == null) {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Cannot remove donee as the announcement already has no donee.").build();
+        }
+        announcement.setUserDonee(null);
+        persistOrUpdate(announcement);
+        return Response.noContent().build();
     }
 }
