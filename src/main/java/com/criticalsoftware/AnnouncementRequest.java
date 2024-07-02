@@ -2,9 +2,13 @@ package com.criticalsoftware;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 public class AnnouncementRequest {
@@ -27,19 +31,6 @@ public class AnnouncementRequest {
     private String productPhotoUrl;
 
     @NotBlank(message = "Category is mandatory and cannot be blank")
-    @Size(max = 255 , message = "Category must be less than or equal to 255 characters")
+    @Size(max = 255, message = "Category must be less than or equal to 255 characters")
     private String productCategory;
-
-    // Constructors
-    public AnnouncementRequest() {
-    }
-
-    public AnnouncementRequest(String id,String userDonorId, String productName, String productDescription, String productPhotoUrl, String productCategory) {
-        this.id = id;
-        this.userDonorId = userDonorId;
-        this.productName = productName;
-        this.productDescription = productDescription;
-        this.productPhotoUrl = productPhotoUrl;
-        this.productCategory = productCategory;
-    }
 }
