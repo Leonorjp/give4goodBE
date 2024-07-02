@@ -1,5 +1,4 @@
 package com.criticalsoftware.users;
-
 import com.criticalsoftware.Contact;
 import io.quarkus.mongodb.panache.PanacheMongoEntity;
 import io.quarkus.mongodb.panache.common.MongoEntity;

@@ -1,6 +1,5 @@
 package com.criticalsoftware;
 
-import org.bson.types.ObjectId;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;

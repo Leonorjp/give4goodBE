@@ -18,10 +18,10 @@ public class AnnouncementClaimRepository implements PanacheMongoRepositoryBase<A
         if (announcement == null) {
             return Response.status(Response.Status.NOT_FOUND).entity("Announcement not found.").build();
         }
-        if (announcement.getUserDoneeId() == null) {
+        if (announcement.getUserDonee().getId() == null) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Cannot remove donee as the announcement already has no donee.").build();
         }
-        announcement.setUserDoneeId(null);
+        announcement.setUserDonee(null);
         persistOrUpdate(announcement);
         return Response.noContent().build();
     }
