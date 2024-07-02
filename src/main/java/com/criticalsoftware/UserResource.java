@@ -73,7 +73,7 @@ public class UserResource {
                 return Response.status(Status.NOT_FOUND).entity("User not found").build();
             }
             userFromDb.setContact(contact);
-            repository.update(userFromDb); // Utilizando o repository injetado para atualizar o usuário
+            repository.update(userFromDb);
             return Response.ok(contact).build();
         } catch (IllegalArgumentException e) {
             return Response.status(Status.BAD_REQUEST).entity("Invalid user ID").build();
@@ -91,7 +91,7 @@ public class UserResource {
             if (user == null) {
                 return Response.status(Response.Status.NOT_FOUND).entity("User not found.").build();
             }
-            repository.delete(user); // Utilizando o repository injetado para deletar o usuário
+            repository.delete(user);
             return Response.noContent().build();
         } catch (IllegalArgumentException e) {
             return Response.status(Status.BAD_REQUEST).entity("Invalid user ID").build();

@@ -1,23 +1,31 @@
 package com.criticalsoftware;
-import org.bson.types.ObjectId;
-import java.awt.image.BufferedImage;
 
 public class Product {
 
-    private ObjectId id;
+    private String id;
     private String description;
-    private BufferedImage photo;
+    private String photoUrl;
     private String category;
-    private User user;
+    private String name;
 
     public Product() {
     }
 
-    public Product(String description, BufferedImage photo, String category, User user) {
+    public Product(String id, String description, String photoUrl, String category, String name) {
+        this.id = id;
         this.description = description;
-        this.photo = photo;
+        this.photoUrl = photoUrl;
         this.category = category;
-        this.user = user;
+        this.name = name;
+    }
+
+    //description
+    public String getId(){
+        return this.id;
+    }
+
+    public void setId (String id) {
+        this.id = id;
     }
 
     //description
@@ -30,12 +38,12 @@ public class Product {
     }
 
     //photo
-    public BufferedImage getPhoto(){
-        return this.photo;
+    public String getPhotoUrl(){
+        return this.photoUrl;
     }
 
-    public void setPhoto(BufferedImage photo) {
-        this.photo = photo;
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
     }
 
     //category
@@ -47,21 +55,12 @@ public class Product {
         this.category = category;
     }
 
-    //user
-    public User getUser(){
-        return this.user;
+    //name
+    public String getName(){
+        return this.name;
     }
 
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    //Id
-    public ObjectId getId(){
-        return this.id;
-    }
-
-    public void setId(ObjectId id) {
-        this.id = id;
+    public void setName(String name) {
+        this.name = name;
     }
 }
