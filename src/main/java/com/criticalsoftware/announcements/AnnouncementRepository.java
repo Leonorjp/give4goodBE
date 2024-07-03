@@ -44,14 +44,14 @@ public class AnnouncementRepository implements PanacheMongoRepository<Announceme
 
     @Transactional
     public Response undoClaim(String id) {
-        Announcement announcement = findById(id);
+        Announcement announcement = findById(new ObjectId((id)));
         if (announcement == null) {
             return Response.status(Response.Status.NOT_FOUND).entity("Announcement not found.").build();
         }
-        if (announcement.getUserDonee().id == null) {
+        if (announcement.getUserDoneeId() == null) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Cannot remove donee as the announcement already has no donee.").build();
         }
-        announcement.setUserDonee(null);
+        announcement.setUserDoneeId(null);
         persistOrUpdate(announcement);
         return Response.noContent().build();
     }

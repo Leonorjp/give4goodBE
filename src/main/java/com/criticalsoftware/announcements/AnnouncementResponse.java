@@ -15,7 +15,14 @@ import java.time.LocalDateTime;
 public class AnnouncementResponse {
     private String id;
     private Product product;
-    private ObjectId userDonorId;
-    private ObjectId userDoneeId;
+    private String userDonorId;
+    private String userDoneeId;
     private LocalDateTime date;
+
+    public AnnouncementResponse(String id, Product product, String userDonorId, LocalDateTime date) {
+        this.id = id;
+        this.product = product;
+        this.userDonorId = userDonorId;
+        this.date = date;
+    }
 }
