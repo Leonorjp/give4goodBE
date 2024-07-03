@@ -15,25 +15,21 @@ public class AnnouncementService {
 
     // Retrieves announcements by donor ID
     public List<AnnouncementResponse> getAnnouncementsByDonorId(String donorId) {
-        ObjectId donorObjectId = new ObjectId(donorId);
-        return announcementRepository.findByDonorId(donorObjectId).stream()
+        return announcementRepository.findByDonorId(donorId).stream()
                 .map(this::mapToResponse)
                 .toList();
     }
 
     // Retrieves announcements by donee ID
     public List<AnnouncementResponse> getAnnouncementsByDoneeId(String doneeId) {
-        ObjectId doneeObjectId = new ObjectId(doneeId);
-        return announcementRepository.findByDoneeId(doneeObjectId).stream()
+        return announcementRepository.findByDoneeId(doneeId).stream()
                 .map(this::mapToResponse)
                 .toList();
     }
 
     // Retrieves announcements by donor and donee ID
     public List<AnnouncementResponse> getAnnouncementsByDonorAndDoneeId(String donorId, String doneeId) {
-        ObjectId donorObjectId = new ObjectId(donorId);
-        ObjectId doneeObjectId = new ObjectId(doneeId);
-        return announcementRepository.findByDonorAndDoneeId(donorObjectId, doneeObjectId).stream()
+        return announcementRepository.findByDonorAndDoneeId(donorId, doneeId).stream()
                 .map(this::mapToResponse)
                 .toList();
     }

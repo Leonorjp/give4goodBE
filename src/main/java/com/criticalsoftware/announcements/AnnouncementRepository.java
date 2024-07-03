@@ -18,17 +18,17 @@ public class AnnouncementRepository implements PanacheMongoRepository<Announceme
     }
 
     // Find announcements by donor ID
-    public List<Announcement> findByDonorId(ObjectId donorId) {
+    public List<Announcement> findByDonorId(String donorId) {
         return list("userDonorId", donorId);
     }
 
     // Find announcements by donee ID
-    public List<Announcement> findByDoneeId(ObjectId doneeId) {
+    public List<Announcement> findByDoneeId(String doneeId) {
         return list("userDoneeId", doneeId);
     }
 
     // Find announcements by donor and donee ID
-    public List<Announcement> findByDonorAndDoneeId(ObjectId donorId, ObjectId doneeId) {
+    public List<Announcement> findByDonorAndDoneeId(String donorId, String doneeId) {
         return list("userDonorId = ?1 and userDoneeId = ?2", donorId, doneeId);
     }
 
