@@ -22,6 +22,9 @@ public class UserResource {
     @POST
     public Response create(@Valid UserRequest userRequest) {
         try {
+            if (repository.findByEmail(userRequest.getContact().getEmail()) != null) {
+                return Response.status(Status.CONFLICT).entity("Email already in use").build();
+            }
             User user = new User(userRequest.getName(), userRequest.getDateBirth(), userRequest.getContact());
             repository.persist(user);
             return Response.created(new URI("/users/" + user.id))

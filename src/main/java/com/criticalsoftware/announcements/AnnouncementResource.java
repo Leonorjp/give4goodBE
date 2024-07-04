@@ -130,6 +130,7 @@ public class AnnouncementResource {
                     announcement.id.toString(),
                     announcement.getProduct(),
                     announcement.getUserDonorId(),
+                    announcement.getUserDoneeId(),
                     announcement.getDate()
             ));
 
@@ -207,6 +208,48 @@ public class AnnouncementResource {
         }
     }
 
+    // Get unclaimed announcements
+    @GET
+    @Path("/unclaimed")
+    public Response getUnclaimedAnnouncements() {
+        try {
+            List<AnnouncementResponse> announcements = announcementService.getUnclaimedAnnouncements();
+            return Response.ok(announcements).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(REQUEST_ERROR + e.getMessage())
+                    .build();
+        }
+    }
+
+    // Get unclaimed announcements not owned by the given donor
+    @GET
+    @Path("/unclaimed/not-owned-by/{donorId}")
+    public Response getUnclaimedAnnouncementsNotOwnedBy(@PathParam("donorId") String donorId) {
+        try {
+            List<AnnouncementResponse> announcements = announcementService.getUnclaimedAnnouncementsNotOwnedByDonor(donorId);
+            return Response.ok(announcements).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(REQUEST_ERROR + e.getMessage())
+                    .build();
+        }
+    }
+
+    // Get announcements not owned by the given donor
+    @GET
+    @Path("/not-owned-by/{donorId}")
+    public Response getAnnouncementsNotOwnedBy(@PathParam("donorId") String donorId) {
+        try {
+            List<AnnouncementResponse> announcements = announcementService.getAnnouncementsNotOwnedByDonor(donorId);
+            return Response.ok(announcements).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(REQUEST_ERROR + e.getMessage())
+                    .build();
+        }
+    }
+
     @PUT
     @Path("/{announcementId}/userDonee/{userId}")
     public Response updateUserDonee(@PathParam("announcementId") String announcementId, @PathParam("userId") String userId) {
@@ -236,7 +279,7 @@ public class AnnouncementResource {
 
             // Check if userDonorId and userDoneeId are not the same
             if (announcement.getUserDonorId().equals(userId)) {
-                return Response.status(Response.Status.BAD_REQUEST).entity("The doner Id and donee Id cannot be the same!").build();
+                return Response.status(Response.Status.BAD_REQUEST).entity("The donor ID and donee ID cannot be the same!").build();
             }
 
             // Set the userDoneeId field of the announcement
@@ -251,7 +294,7 @@ public class AnnouncementResource {
         }
     }
 
-    //Get by id
+    // Get by ID
     @GET
     @Path("/{id}")
     public Response getById(@PathParam("id") String id) {
@@ -263,7 +306,7 @@ public class AnnouncementResource {
         return Response.ok(announcementResponse).build();
     }
 
-    //Get ALL
+    // Get ALL
     @GET
     public Response getAll() {
         List<Announcement> announcements = announcementRepository.listAll();

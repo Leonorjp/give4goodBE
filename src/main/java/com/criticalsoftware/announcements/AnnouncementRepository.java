@@ -13,7 +13,7 @@ import java.util.List;
 public class AnnouncementRepository implements PanacheMongoRepository<Announcement> {
 
     // Find an announcement by ID
-    public Announcement findById(String id) {
+    public Announcement findById(ObjectId id) {
         return find("_id", id).firstResult();
     }
 
@@ -32,19 +32,24 @@ public class AnnouncementRepository implements PanacheMongoRepository<Announceme
         return list("userDonorId = ?1 and userDoneeId = ?2", donorId, doneeId);
     }
 
-    // Delete an announcement by ID
-    public void deleteById(String id) {
-        try {
-            // Delete the announcement from the collection using the ID
-            delete("_id", id);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid ID format", e);
-        }
+    // Find unclaimed announcements
+    public List<Announcement> findByClaimedFalse() {
+        return list("claimed", false);
+    }
+
+    // Find unclaimed announcements not owned by the given donor
+    public List<Announcement> findUnclaimedNotOwnedByDonor(String donorId) {
+        return list("userDonorId != ?1 and claimed = false", donorId);
+    }
+
+    // Find announcements not owned by the given donor
+    public List<Announcement> findNotOwnedByDonor(String donorId) {
+        return list("userDonorId != ?1", donorId);
     }
 
     @Transactional
     public Response undoClaim(String id) {
-        Announcement announcement = findById(new ObjectId((id)));
+        Announcement announcement = findById(new ObjectId(id));
         if (announcement == null) {
             return Response.status(Response.Status.NOT_FOUND).entity("Announcement not found.").build();
         }
