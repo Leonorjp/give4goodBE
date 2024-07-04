@@ -19,7 +19,6 @@ public class Announcement extends PanacheMongoEntity {
     private LocalDateTime date;
     private String userDonorId;
     private String userDoneeId;
-    private boolean isClaimed;
 
     public Announcement(Product product, String userDonorId) {
         this.product = product;

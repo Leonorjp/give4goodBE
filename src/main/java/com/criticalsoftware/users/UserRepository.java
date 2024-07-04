@@ -23,4 +23,8 @@ public class UserRepository implements PanacheMongoRepository<User> {
 
         }
     }
+
+    public User findByEmail(String email) {
+        return find("contact.email", email).firstResult();
+    }
 }
