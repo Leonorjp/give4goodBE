@@ -16,12 +16,17 @@ import java.util.stream.Collectors;
 @Path("/users")
 public class UserResource {
 
+    public static final String USER_NOT_FOUND = "User not found.";
+
     @Inject
     UserRepository repository;
 
     @POST
     public Response create(@Valid UserRequest userRequest) {
         try {
+            if (repository.findByEmail(userRequest.getContact().getEmail()) != null) {
+                return Response.status(Status.CONFLICT).entity("Email already in use").build();
+            }
             User user = new User(userRequest.getName(), userRequest.getDateBirth(), userRequest.getContact());
             repository.persist(user);
             return Response.created(new URI("/users/" + user.id))
@@ -41,7 +46,7 @@ public class UserResource {
     public Response getByEmail(@PathParam("email") String email) {
         User user = repository.findByEmail(email);
         if (user == null) {
-            return Response.status(Response.Status.NOT_FOUND).entity("User not found.").build();
+            return Response.status(Response.Status.NOT_FOUND).entity(USER_NOT_FOUND).build();
         }
         UserResponse userResponse = new UserResponse(user.id, user.getName(), user.getDateBirth(), user.getContact());
         return Response.ok(userResponse).build();
@@ -52,7 +57,7 @@ public class UserResource {
     public Response getById(@PathParam("id") String id) {
         User user = repository.findById(new ObjectId(id));
         if (user == null) {
-            return Response.status(Response.Status.NOT_FOUND).entity("User not found.").build();
+            return Response.status(Response.Status.NOT_FOUND).entity(USER_NOT_FOUND).build();
         }
         UserResponse userResponse = new UserResponse(user.id, user.getName(), user.getDateBirth(), user.getContact());
         return Response.ok(userResponse).build();
@@ -98,7 +103,7 @@ public class UserResource {
             ObjectId objectId = new ObjectId(id);
             User user = repository.findById(objectId);
             if (user == null) {
-                return Response.status(Response.Status.NOT_FOUND).entity("User not found.").build();
+                return Response.status(Response.Status.NOT_FOUND).entity(USER_NOT_FOUND).build();
             }
             repository.delete(user);
             return Response.noContent().build();

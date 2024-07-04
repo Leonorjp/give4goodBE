@@ -37,22 +37,23 @@ public class AnnouncementResource {
     @DELETE
     @Path("/{id}")
     public Response delete(@PathParam("id") String id) {
+        ObjectId objectId = new ObjectId(id);
 
         // Check if the provided ID is valid
         if (!id.matches(ID_REGEX)) {
             return Response.status(Response.Status.BAD_REQUEST).entity(INVALID_ID_FORMAT).build();
         }
         // Find the announcement by ID
-        Announcement announcement = announcementRepository.findById(id);
+        Announcement announcement = announcementRepository.findById(objectId);
         if (announcement == null) {
             return Response.status(Response.Status.NOT_FOUND).entity("Announcement not found.").build();
         }
 
         // Use the repository method to delete by ID
-        announcementRepository.deleteById(id);
+        announcementRepository.deleteById(objectId);
 
         // Check if the announcement still exists
-        announcement = announcementRepository.findById(id);
+        announcement = announcementRepository.findById(objectId);
         if (announcement != null) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("An error occurred while deleting the announcement").build();
         }
@@ -63,7 +64,7 @@ public class AnnouncementResource {
     @Path("/{id}")
     public Response update(@PathParam("id") String id, AnnouncementRequest announcementRequest) {
         try {
-            Announcement announcement = announcementRepository.findById(id);
+            Announcement announcement = announcementRepository.findById(new ObjectId(id));
             if (!id.matches(ID_REGEX)) {
                 return Response.status(Response.Status.BAD_REQUEST).entity(INVALID_ID_FORMAT).build();
             }
@@ -118,8 +119,7 @@ public class AnnouncementResource {
 
             Announcement announcement = new Announcement(
                     product,
-                    userDonor
-
+                    userDonor.id.toString()
             );
 
             announcementRepository.persist(announcement);
@@ -129,8 +129,8 @@ public class AnnouncementResource {
             responseMap.put("announcement", new AnnouncementResponse(
                     announcement.id.toString(),
                     announcement.getProduct(),
-                    announcement.getUserDonor().id,
-                    announcement.getUserDonee().id,
+                    announcement.getUserDonorId(),
+                    announcement.getUserDoneeId(),
                     announcement.getDate()
             ));
 
@@ -208,13 +208,55 @@ public class AnnouncementResource {
         }
     }
 
+    // Get unclaimed announcements
+    @GET
+    @Path("/unclaimed")
+    public Response getUnclaimedAnnouncements() {
+        try {
+            List<AnnouncementResponse> announcements = announcementService.getUnclaimedAnnouncements();
+            return Response.ok(announcements).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(REQUEST_ERROR + e.getMessage())
+                    .build();
+        }
+    }
+
+    // Get unclaimed announcements not owned by the given donor
+    @GET
+    @Path("/unclaimed/not-owned-by/{donorId}")
+    public Response getUnclaimedAnnouncementsNotOwnedBy(@PathParam("donorId") String donorId) {
+        try {
+            List<AnnouncementResponse> announcements = announcementService.getUnclaimedAnnouncementsNotOwnedByDonor(donorId);
+            return Response.ok(announcements).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(REQUEST_ERROR + e.getMessage())
+                    .build();
+        }
+    }
+
+    // Get announcements not owned by the given donor
+    @GET
+    @Path("/not-owned-by/{donorId}")
+    public Response getAnnouncementsNotOwnedBy(@PathParam("donorId") String donorId) {
+        try {
+            List<AnnouncementResponse> announcements = announcementService.getAnnouncementsNotOwnedByDonor(donorId);
+            return Response.ok(announcements).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(REQUEST_ERROR + e.getMessage())
+                    .build();
+        }
+    }
+
     @PUT
     @Path("/{announcementId}/userDonee/{userId}")
     public Response updateUserDonee(@PathParam("announcementId") String announcementId, @PathParam("userId") String userId) {
         try {
 
             // Check if the announcementId is valid
-            Announcement announcement = announcementRepository.findById(announcementId);
+            Announcement announcement = announcementRepository.findById(new ObjectId(announcementId));
             if (!announcementId.matches(ID_REGEX)) {
                 return Response.status(Response.Status.BAD_REQUEST).entity(INVALID_ID_FORMAT).build();
             }
@@ -225,7 +267,7 @@ public class AnnouncementResource {
             }
 
             // Check if the userDoneeId is valid
-            User userDonee = userRepository.findById(userId);
+            User userDonee = userRepository.findById(new ObjectId((userId)));
             if (!userId.matches(ID_REGEX)) {
                 return Response.status(Response.Status.BAD_REQUEST).entity(INVALID_ID_FORMAT).build();
             }
@@ -236,12 +278,12 @@ public class AnnouncementResource {
             }
 
             // Check if userDonorId and userDoneeId are not the same
-            if (announcement.getUserDonor().id.equals(new ObjectId(userId))) {
-                return Response.status(Response.Status.BAD_REQUEST).entity("The doner Id and donee Id cannot be the same!").build();
+            if (announcement.getUserDonorId().equals(userId)) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("The donor ID and donee ID cannot be the same!").build();
             }
 
             // Set the userDoneeId field of the announcement
-            announcement.setUserDonee(userDonee);
+            announcement.setUserDoneeId(userId);
 
             // Update the announcement in the repository
             announcementRepository.persistOrUpdate(announcement);
@@ -252,26 +294,26 @@ public class AnnouncementResource {
         }
     }
 
-    //Get by id
+    // Get by ID
     @GET
     @Path("/{id}")
     public Response getById(@PathParam("id") String id) {
-        Announcement announcement = announcementRepository.findById(id);
+        Announcement announcement = announcementRepository.findById(new ObjectId(id));
         if (announcement == null) {
             return Response.status(Response.Status.NOT_FOUND).entity("Announcement not found.").build();
         }
-        AnnouncementResponse announcementResponse = new AnnouncementResponse(announcement.id.toString(), announcement.getProduct(), announcement.getUserDonor().id, announcement.getUserDonee().id, announcement.getDate());
+        AnnouncementResponse announcementResponse = new AnnouncementResponse(announcement.id.toString(), announcement.getProduct(), announcement.getUserDonorId(), announcement.getUserDoneeId(), announcement.getDate());
         return Response.ok(announcementResponse).build();
     }
 
-    //Get ALL
+    // Get ALL
     @GET
     public Response getAll() {
         List<Announcement> announcements = announcementRepository.listAll();
 
         List<AnnouncementResponse> announcementResponses = new ArrayList<>();
         for (Announcement announcement : announcements) {
-            AnnouncementResponse announcementResponse = new AnnouncementResponse(announcement.id.toString(), announcement.getProduct(), announcement.getUserDonor().id, announcement.getUserDonee().id, announcement.getDate());
+            AnnouncementResponse announcementResponse = new AnnouncementResponse(announcement.id.toString(), announcement.getProduct(), announcement.getUserDonorId(), announcement.getUserDoneeId(), announcement.getDate());
             announcementResponses.add(announcementResponse);
         }
         return Response.ok(announcementResponses).build();
