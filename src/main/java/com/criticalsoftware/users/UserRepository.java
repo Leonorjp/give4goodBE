@@ -16,4 +16,8 @@ public class UserRepository implements PanacheMongoRepository<User> {
             return null;
         }
     }
+
+    public User findByEmail(String email) {
+        return find("contact.email", email).firstResult();
+    }
 }

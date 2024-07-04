@@ -37,6 +37,17 @@ public class UserResource {
     }
 
     @GET
+    @Path("/email/{email}")
+    public Response getByEmail(@PathParam("email") String email) {
+        User user = repository.findByEmail(email);
+        if (user == null) {
+            return Response.status(Response.Status.NOT_FOUND).entity("User not found.").build();
+        }
+        UserResponse userResponse = new UserResponse(user.id, user.getName(), user.getDateBirth(), user.getContact());
+        return Response.ok(userResponse).build();
+    }
+
+    @GET
     @Path("/{id}")
     public Response getById(@PathParam("id") String id) {
         User user = repository.findById(new ObjectId(id));
@@ -46,6 +57,7 @@ public class UserResource {
         UserResponse userResponse = new UserResponse(user.id, user.getName(), user.getDateBirth(), user.getContact());
         return Response.ok(userResponse).build();
     }
+
 
     @GET
     public Response getAll() {
@@ -58,6 +70,7 @@ public class UserResource {
         }
         return Response.ok(userResponses).build();
     }
+
 
     @PUT
     @Path("/{id}")

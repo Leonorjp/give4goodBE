@@ -17,13 +17,12 @@ public class Announcement extends PanacheMongoEntity {
 
     private Product product;
     private LocalDateTime date;
-    private User userDonor;
-    private User userDonee;
-    private boolean isClaimed;
+    private String userDonorId;
+    private String userDoneeId;
 
-    public Announcement(Product product, User userDonor) {
+    public Announcement(Product product, String userDonorId) {
         this.product = product;
         this.date = LocalDateTime.now();
-        this.userDonor = userDonor;
+        this.userDonorId = userDonorId;
     }
 }

@@ -28,7 +28,6 @@ public class AnnouncementRequest {
     private String productDescription;
 
     @NotBlank(message = "Photo URL is mandatory and cannot be blank")
-    @Size(max = 200, message = "Photo URL must be less than or equal to 200 characters")
     private String productPhotoUrl;
 
     @NotBlank(message = "Category is mandatory and cannot be blank")
