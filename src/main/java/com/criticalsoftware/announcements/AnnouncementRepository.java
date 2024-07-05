@@ -39,7 +39,7 @@ public class AnnouncementRepository implements PanacheMongoRepository<Announceme
 
     // Find unclaimed announcements not owned by the given donor
     public List<Announcement> findUnclaimedNotOwnedByDonor(String donorId) {
-        return list("userDonorId != ?1 and claimed = false", donorId);
+        return list("userDonorId != ?1 and userDoneeId is null", donorId);
     }
 
     // Find announcements not owned by the given donor
