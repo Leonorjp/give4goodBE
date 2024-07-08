@@ -10,7 +10,6 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
-//User Data Request
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -25,4 +24,7 @@ public class UserRequest {
     @Valid
     @NotNull(message = "Contact is mandatory")
     private Contact contact;
+
+    @NotBlank(message = "Password is mandatory")
+    private String password;
 }

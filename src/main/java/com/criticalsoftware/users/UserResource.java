@@ -8,6 +8,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import org.bson.types.ObjectId;
 
+import javax.crypto.SecretKey;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,14 +28,27 @@ public class UserResource {
             if (repository.findByEmail(userRequest.getContact().getEmail()) != null) {
                 return Response.status(Status.CONFLICT).entity("Email already in use").build();
             }
-            User user = new User(userRequest.getName(), userRequest.getDateBirth(), userRequest.getContact());
+
+            // Generate or retrieve secret key
+            SecretKey secretKey = Encrypt.getSecretKey();
+
+            // Encrypt the password
+            String encryptedPassword = Encrypt.encrypt(userRequest.getPassword(), secretKey);
+
+            //Create the User entity with the encrypted password
+            User user = new User(userRequest.getName(), userRequest.getDateBirth(), userRequest.getContact(), encryptedPassword);
+
+            // Persista o usuário
             repository.persist(user);
+
             return Response.created(new URI("/users/" + user.id))
                     .entity("User created successfully with ID: " + user.id)
                     .build();
         } catch (ConstraintViolationException e) {
-            String errorMessages = e.getConstraintViolations().stream().map(violation -> violation.getPropertyPath() + ": " + violation.getMessage()).collect(Collectors.joining(", "));
-
+            String errorMessages = e.getConstraintViolations()
+                    .stream()
+                    .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+                    .collect(Collectors.joining(", "));
             return Response.status(Status.BAD_REQUEST).entity("Validation error: " + errorMessages).build();
         } catch (Exception e) {
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating user: " + e.getMessage()).build();
