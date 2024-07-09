@@ -27,14 +27,21 @@ public class UserResource {
             if (repository.findByEmail(userRequest.getContact().getEmail()) != null) {
                 return Response.status(Status.CONFLICT).entity("Email already in use").build();
             }
-            User user = new User(userRequest.getName(), userRequest.getDateBirth(), userRequest.getContact());
+
+            //Create the User entity without encrypted password
+            User user = new User(userRequest.getName(), userRequest.getDateBirth(), userRequest.getContact(), userRequest.getPassword());
+
+            // Persist the user
             repository.persist(user);
+
             return Response.created(new URI("/users/" + user.id))
                     .entity("User created successfully with ID: " + user.id)
                     .build();
         } catch (ConstraintViolationException e) {
-            String errorMessages = e.getConstraintViolations().stream().map(violation -> violation.getPropertyPath() + ": " + violation.getMessage()).collect(Collectors.joining(", "));
-
+            String errorMessages = e.getConstraintViolations()
+                    .stream()
+                    .map(violation -> violation.getPropertyPath() + ": " + violation.getMessage())
+                    .collect(Collectors.joining(", "));
             return Response.status(Status.BAD_REQUEST).entity("Validation error: " + errorMessages).build();
         } catch (Exception e) {
             return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Error creating user: " + e.getMessage()).build();
@@ -63,7 +70,6 @@ public class UserResource {
         return Response.ok(userResponse).build();
     }
 
-
     @GET
     public Response getAll() {
         List<User> users = repository.listAll();
@@ -75,7 +81,6 @@ public class UserResource {
         }
         return Response.ok(userResponses).build();
     }
-
 
     @PUT
     @Path("/{id}")

@@ -18,4 +18,13 @@ public class User extends PanacheMongoEntity {
     private String name;
     private LocalDate dateBirth;
     private Contact contact;
+    private String password;
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getPassword() {
+        return this.password;
+    }
 }
