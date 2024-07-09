@@ -8,7 +8,6 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import org.bson.types.ObjectId;
 
-import javax.crypto.SecretKey;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,16 +28,10 @@ public class UserResource {
                 return Response.status(Status.CONFLICT).entity("Email already in use").build();
             }
 
-            // Generate or retrieve secret key
-            SecretKey secretKey = Encrypt.getSecretKey();
+            //Create the User entity without encrypted password
+            User user = new User(userRequest.getName(), userRequest.getDateBirth(), userRequest.getContact(), userRequest.getPassword());
 
-            // Encrypt the password
-            String encryptedPassword = Encrypt.encrypt(userRequest.getPassword(), secretKey);
-
-            //Create the User entity with the encrypted password
-            User user = new User(userRequest.getName(), userRequest.getDateBirth(), userRequest.getContact(), encryptedPassword);
-
-            // Persista o usuário
+            // Persist the user
             repository.persist(user);
 
             return Response.created(new URI("/users/" + user.id))
@@ -77,7 +70,6 @@ public class UserResource {
         return Response.ok(userResponse).build();
     }
 
-
     @GET
     public Response getAll() {
         List<User> users = repository.listAll();
@@ -89,7 +81,6 @@ public class UserResource {
         }
         return Response.ok(userResponses).build();
     }
-
 
     @PUT
     @Path("/{id}")
